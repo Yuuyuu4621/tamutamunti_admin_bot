@@ -73,13 +73,38 @@ async def version(interaction: discord.Interaction):
             await interaction.response.send_message("このサーバーではこのコマンドを使用できません。")
     await interaction.response.send_message(f"現在のバージョンは {version} です")
 
-@bot.event
-async def on_message(message):
-    if isinstance(message.channel, discord.DMChannel) and not message.author.bot:
-        channel = bot.get_channel(CHANNEL_ID)  # 指定されたチャンネルを取得
-        if channel:
-            await channel.send(f"Received DM from {message.author}: {message.content}")
-            print (f'{message.author}: {message.content}')
+@bot.tree.command(name='join', description='ボイスチャンネルに参加します')
+async def join(ctx):
+    # Interactionからユーザーを取得します
+    user = ctx.user
+    # Interactionからボイスチャンネルを取得します
+    channel = user.voice.channel if user.voice else None
+
+    # ボイスチャンネルに接続しているか確認します
+    if channel:
+        vc = await channel.connect()
+        await ctx.send(f'ボイスチャンネルに参加しました')
+    else:
+        await ctx.send('ボイスチャンネルに接続していません')
+
+@bot.tree.command(name="leave", description="ボイスチャンネルから退出します")
+async def leave(interaction: discord.Interaction):
+    # メンバー情報を取得
+    member = interaction.guild.get_member(interaction.user.id)
+    # メンバーがボイスチャンネルに接続しているかどうかを確認
+    if member.voice:
+        # ボイスチャンネルから接続しているボイスクライアントを取得
+        vc = member.voice.channel.guild.voice_client
+        # ボイスクライアントが接続しているかどうかを確認
+        if vc:
+            # ボイスチャンネルから退出
+            await vc.disconnect()
+            await interaction.response.send_message("ボイスチャンネルから退出しました。")
+        else:
+            await interaction.response.send_message("ボイスチャンネルに接続していません。")
+    else:
+        await interaction.response.send_message("ボイスチャンネルに接続していません。")
+
 
 @bot.tree.command(name="time", description="現在の時刻を表示します")
 async def time(interaction: discord.Interaction):
