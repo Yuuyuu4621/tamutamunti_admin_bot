@@ -17,7 +17,6 @@ load_dotenv()
 token = os.getenv("token")
 version = os.getenv("version")
 webhook = os.getenv("webhook")
-allow_server_id = os.gotenv("allow_server_id")
 
 # WEBHOOKURL
 WEBHOOK_URL = webhook
@@ -51,7 +50,7 @@ intents.message_content = True
 # Botの初期化
 bot = commands.Bot(command_prefix="/", intents=intents)
 CHANNEL_ID = 1217753256076378152
-ALLOWED_SERVER_ID = allow_server_id
+ALLOWED_SERVER_ID = 1197911092861612073
 
 # コマンドの設定
 
