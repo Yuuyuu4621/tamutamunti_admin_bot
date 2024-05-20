@@ -131,22 +131,23 @@ async def on_command_error(ctx, error):
         await ctx.send("指定されたチャンネルが見つかりません。")
 
 @bot.tree.command(name="message", description="指定されたチャンネルにメッセージを送信します")
-async def send_message(ctx, channel_id: str, *, message: str):
+async def send_message(interaction: discord.Interaction, channel_id: str, *, message: str):
     try:
         channel_id = int(channel_id)
         channel = bot.get_channel(channel_id)
         if channel:
-            Interaction.response.send_message(message)
-            await Interaction.response.send_message(f"メッセージを {channel.mention} に送信しました。")
+            # メッセージ内の '\\n' を改行に置き換え
+            formatted_message = message.replace("\\n", "\n")
+            await channel.send(formatted_message)
+            await interaction.response.send_message(f"メッセージを {channel.mention} に送信しました。")
         else:
-            Interaction.response.send_message("指定されたチャンネルが見つかりません。")
+            await interaction.response.send_message("指定されたチャンネルが見つかりません。")
     except discord.Forbidden:
-        Interaction.response.send_message("指定されたチャンネルにメッセージを送信する権限がありません。")
+        await interaction.response.send_message("指定されたチャンネルにメッセージを送信する権限がありません。")
     except ValueError:
-        Interaction.response.send_message("有効な整数を入力してください。")
+        await interaction.response.send_message("有効な整数を入力してください。")
     except Exception as e:
-        Interaction.response.send_message(f"エラーが発生しました: {e}")
-
+        await interaction.response.send_message(f"エラーが発生しました: {e}")
 
 @bot.tree.command(name="kick", description="指定されたプレイヤーをキックします")
 @app_commands.describe(user="キックするユーザーの名前", reason="キックする理由")
