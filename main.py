@@ -73,19 +73,23 @@ async def version(interaction: discord.Interaction):
             await interaction.response.send_message("このサーバーではこのコマンドを使用できません。")
     await interaction.response.send_message(f"現在のバージョンは {version} です")
 
-@bot.tree.command(name='join', description='ボイスチャンネルに参加します')
-async def join(ctx):
-    # Interactionからユーザーを取得します
-    user = ctx.user
-    # Interactionからボイスチャンネルを取得します
-    channel = user.voice.channel if user.voice else None
-
-    # ボイスチャンネルに接続しているか確認します
-    if channel:
-        vc = await channel.connect()
-        await ctx.send(f'ボイスチャンネルに参加しました')
+@bot.tree.command(name="join", description="ボイスチャンネルに参加します")
+async def join(interaction: discord.Interaction):
+    # メンバー情報を取得
+    member = interaction.guild.get_member(interaction.user.id)
+    # メンバーがボイスチャンネルに接続しているかどうかを確認
+    if member.voice:
+        # メンバーがいるボイスチャンネルを取得
+        channel = member.voice.channel
+        # ボイスクライアントがすでに接続していない場合に接続
+        if interaction.guild.voice_client is None:
+            await channel.connect()
+            await interaction.response.send_message("ボイスチャンネルに参加しました。")
+        else:
+            await interaction.response.send_message("既にボイスチャンネルに接続しています。")
     else:
-        await ctx.send('ボイスチャンネルに接続していません')
+        await interaction.response.send_message("ボイスチャンネルに接続していません。")
+
 
 @bot.tree.command(name="leave", description="ボイスチャンネルから退出します")
 async def leave(interaction: discord.Interaction):
