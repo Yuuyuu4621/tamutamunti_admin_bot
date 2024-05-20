@@ -4,6 +4,7 @@ from discord import app_commands
 from discord import Intents, Client, Interaction
 from discord.app_commands import CommandTree
 from dotenv import load_dotenv
+import asyncio
 import os
 import sys
 import datetime
@@ -23,10 +24,18 @@ intents.message_content = True
 
 bot = commands.Bot(command_prefix="/", intents=intents)
 
+statuses = ["/help | タムタムん家 管理bot", "/help | Version 0.01"]
+
+async def change_status():
+    while True:
+        for status in statuses:
+            await bot.change_presence(activity=discord.Game(name=status))
+            await asyncio.sleep(60)
+
 @bot.event
 async def on_ready():
-    print (f'Logged in as {bot.user} How are you?')
-    await bot.change_presence(status=discord.Status.online, activity=discord.Game(name="テスト"))
+    print (f'Logged in as {bot.user}')
+    bot.loop.create_task(change_status())
 
 @bot.tree.command(name="version", description="現在のバージョンを表示します")
 async def version(interaction: discord.Interaction):
@@ -107,7 +116,10 @@ async def send_message(interaction: discord.Interaction, channel_id: str, *, mes
 @bot.tree.command(name="kick", description="指定されたプレイヤーをキックします")
 @app_commands.describe(user="キックするユーザーの名前", reason="キックする理由")
 async def kick(interaction: discord.Interaction, user: discord.Member, reason: str):
-    # キックするユーザーの名前を取得
+    if not interaction.user.guild_permissions.kick_members:
+        await interaction.response.send_message("あなたにはこのコマンドを実行する権限がありません。")
+        return
+
     try:
         await user.kick(reason=f"{reason} (Kicked by {interaction.user.name})")
         await interaction.response.send_message(f"{user.name} はキックされました。 理由: {reason}")
