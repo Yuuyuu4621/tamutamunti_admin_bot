@@ -37,6 +37,18 @@ async def on_ready():
     print (f'Logged in as {bot.user}')
     bot.loop.create_task(change_status())
 
+    login_channel = bot.get_channel(1242327958195011624)
+    login_time = datetime.datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
+    login_embed = discord.Embed(
+        title="**起動しました**",
+        description=f"{login_time} {bot.user} **起動**しました",
+        color=discord.Color.blue()
+    )
+    if login_channel:
+        await login_channel.send (embed=login_embed)
+    else:
+        print ("チャンネルが見つかりません")
+
 @bot.tree.command(name="version", description="現在のバージョンを表示します")
 async def version(interaction: discord.Interaction):
     await interaction.response.send_message(f"現在のバージョンは {version_hensuu} です")
@@ -100,7 +112,6 @@ async def send_message(interaction: discord.Interaction, channel_id: str, *, mes
         channel_id = int(channel_id)
         channel = bot.get_channel(channel_id)
         if channel:
-            # メッセージ内の '\\n' を改行に置き換え
             formatted_message = message.replace("\\n", "\n")
             await channel.send(formatted_message)
             await interaction.response.send_message(f"メッセージを {channel.mention} に送信しました。")
@@ -178,9 +189,20 @@ class AdminCommands(discord.app_commands.Group):
     @discord.app_commands.command(name="stop", description="ボットを停止します")
     async def stop(self, interaction: discord.Interaction):
         user_id = interaction.user.id
+        logout_channel = bot.get_channel(1242327958195011624)
+        logout_time = datetime.datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
+        logout_embed = discord.Embed(
+        title="**停止しました**",
+        description=f"{logout_time} {bot.user} **停止**しました",
+        color=discord.Color.red()
+    )
         if user_id == yuuyuu4621_ID:
-            await interaction.response.send_message("停止します")
-            await bot.close()
+            if logout_channel:
+                await interaction.response.send_message("停止します")
+                await logout_channel.send(embed=logout_embed)
+                await bot.close()
+            else:
+                print ("チャンネルが見つかりません")
         else:
             await interaction.response.send_message("あなたには実行権限がありません")
 
@@ -218,9 +240,18 @@ class AdminCommands(discord.app_commands.Group):
     @discord.app_commands.command(name="restart", description="ボットを再起動します")
     async def restart(self, interaction: discord.Interaction):
         user_id = interaction.user.id
+        restart_channel = bot.get_channel(1242327958195011624)
+        restart_time = datetime.datetime.now().strftime("%Y/%m/%d-%H:%M:%S")
+        restart_embed = discord.Embed(
+        title="**停止しました**",
+        description=f"{restart_time} {bot.user} **停止**しました",
+        color=discord.Color.red()
+    )
         if user_id == yuuyuu4621_ID:
-            await interaction.response.send_message("再起動します...")
-            await restart_bot()
+            if restart_channel:
+                await interaction.response.send_message("再起動します")
+                await restart_channel.send(embed=restart_embed)
+                await restart_bot()
         else:
             await interaction.response.send_message("あなたには実行権限がありません")
 
